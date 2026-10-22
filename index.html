@@ -765,8 +765,22 @@ figure:empty{display:none}
 .tip{display:flex;gap:14px;align-items:flex-start;margin-top:var(--s-3);background:var(--c-pink);color:var(--on-pink);padding:18px 22px;font-size:16px;line-height:1.5}
 .tip svg{flex:none;margin-top:2px}
 .origins{position:sticky;top:calc(var(--hd) + 8px);max-height:calc(100vh - var(--hd) - 32px);display:flex;flex-direction:column;border-top:1.5px solid var(--ink);padding-top:var(--s-2)}
-#oq{flex:none;width:100%;height:48px;margin:14px 0 16px;padding:0 20px;border-radius:var(--r-pill);border:1.5px solid var(--ink);background:var(--paper-2);font:inherit;font-size:16px;color:var(--ink)}
+.oqwrap{position:relative;z-index:2;flex:none;margin:14px 0 16px}
+#oq{flex:none;width:100%;height:48px;margin:0;padding:0 20px;border-radius:var(--r-pill);border:1.5px solid var(--ink);background:var(--paper-2);font:inherit;font-size:16px;color:var(--ink)}
 #oq::placeholder{color:var(--ink-2);opacity:1}
+.oqdd{position:absolute;z-index:5;left:0;right:0;top:calc(100% + 6px);margin:0;padding:6px;background:var(--paper-2);color:var(--ink);border:1.5px solid var(--ink);border-radius:20px;max-height:min(432px,50vh);overflow:auto;overscroll-behavior:contain}
+.oqdd.up{top:auto;bottom:calc(100% + 6px)}
+.oqdd[hidden]{display:none!important}
+.oqdd .item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px}
+.oqdd .item span{min-width:0;flex:1}
+.oqdd .item b{font-size:15px}
+.oqdd .item small{display:block;margin-top:1px;font-size:13px;line-height:1.35;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oqdd .item.sub{padding-left:26px}
+.oqdd .sw{width:10px;height:10px;border-radius:50%;flex:none}
+.oqdd .item.sub .sw{width:8px;height:8px}
+.oqdd .item:hover:not(.hi){background:rgba(32,30,31,.06)}
+.oqdd .item.hi{background:var(--ink);color:var(--paper)}
+.oqdd .item.hi small{color:inherit}
 #regions{flex:1 1 auto;min-height:200px;overflow-y:auto;padding-right:6px;overscroll-behavior:contain}
 .grph{display:flex;align-items:center;gap:8px;margin:20px 0 8px;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .grph:first-child{margin-top:4px}
@@ -954,10 +968,10 @@ input[type=checkbox]:checked::after{opacity:1}
 @media (max-width:1000px){
   .origin-grid,.bt-top,.calcgrid,.cupsec,.qcgrid{grid-template-columns:minmax(0,1fr)}
   /* Beans Origin: map → search → details. The region list stays in the DOM for desktop. */
-  .origins{position:static;max-height:none;order:-1;border-top:0;padding-top:0}
+  .origins{position:relative;z-index:800;max-height:none;order:-1;border-top:0;padding-top:0}
   .origins>.lbl[data-t="regionsH"]{display:none}
   #regions{display:none}
-  #oq{margin:0}
+  .oqwrap{margin:0}
   .cupsec .photo{position:static}
 }
 @media (max-width:760px){
@@ -1018,7 +1032,7 @@ input[type=checkbox]:checked::after{opacity:1}
 <article class="details"><div class="dhead" id="dHead"><p class="lbl" data-t="detailH"></p><h2 id="dName"></h2><div id="dTag"></div></div>
 <div class="dbody"><div class="flvwrap"><p class="lbl" data-t="flavorH"></p><span id="dFlavor"></span></div><div id="dFacts"></div><div id="dChips"></div><div id="dFun"></div>
 <div id="dCls"><p class="lbl" data-t="notesH"></p><div id="dCFacts"></div><div class="note" id="dNotes"></div><div id="dTip"></div></div></div></article>
-<aside class="origins" id="regionsCard"><p class="lbl" data-t="regionsH"></p><input id="oq" type="search"><div id="regions"></div></aside>
+<aside class="origins" id="regionsCard"><p class="lbl" data-t="regionsH"></p><div class="oqwrap"><input id="oq" type="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="oqdd"><div id="oqdd" class="oqdd" role="listbox" hidden></div></div><div id="regions"></div></aside>
 </div>
 <div class="wrap two"><section class="rule-sec"><p class="lbl" data-t="historyH"></p><ul id="histList"></ul></section><section class="rule-sec"><p class="lbl" data-t="takeH"></p><ul id="take"></ul><p class="foot" data-t="footnote"></p></section></div>
 <section class="wrap srcwrap"><div class="rule-sec"><details><summary><span class="lbl" id="srcH"></span><span class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></summary><ul class="src" id="srcList"></ul></details><p class="foot" id="srcNote"></p></div></section>
@@ -1836,7 +1850,7 @@ const SESSION = {
 };
 
 const H=new URLSearchParams(location.hash.slice(1));
-let lang=H.get('lang')||localStorage.getItem('sonnecad-lang')||'en',sel='brazil',markers={},map,q='';
+let lang=H.get('lang')||localStorage.getItem('sonnecad-lang')||'en',sel='brazil',markers={},map,q='',ddOn=false,ddHi=0,ddBlur;
 const T=k=>(SESSION.ui[lang]||{})[k]||'';
 const colors={arabica:'#6B3E1E',robusta:'#201E1F',liberica:'#1C3D24'};
 const AT=window.ATLAS||{},CR=SESSION.regions||{};
@@ -1865,7 +1879,18 @@ for(const k of top){const ch=kids(k).filter(matches);if(!matches(k)&&!ch.length)
 rows+=`<div class="item ${sel==k?'sel':''}" style="${BV(g)}" role="button" ${KEY} onclick="pick('${k}',1)"><div class="dot" style="background:${GC[g]};width:12px;height:12px"></div><div><b>${nm(k)}${P[k].c?' ★':''}</b><small>${P[k].a?P[k].a[lang].f:P[k].c[lang].tag||''}</small></div></div>`;
 for(const j of ch){rows+=`<div class="item subi ${sel==j?'sel':''}" style="${BV(g)}" role="button" ${KEY} onclick="pick('${j}',1)"><div class="dot" style="background:${GC[g]};width:8px;height:8px"></div><div><b>${nm(j)}</b></div></div>`}}
 if(n)h+=`<div class="grph"><span class="dot" style="background:${GC[g]};width:12px;height:12px"></span>${GN[g][lang]} <em>(${n})</em></div>`+rows}
-regions.innerHTML=h||`<p class="note">${FL[lang].none}</p>`}
+regions.innerHTML=h||`<p class="note">${FL[lang].none}</p>`;renderDD()}
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function ddKeys(){const out=[];for(const g in GC){const top=Object.keys(P).filter(k=>P[k].g==g&&!P[k].p);for(const k of top){if(matches(k))out.push(k);for(const j of kids(k))if(matches(j))out.push(j)}}return out}
+function renderDD(){const box=document.getElementById('oqdd');if(!box||!oq)return;const hits=q&&ddOn?ddKeys():[];
+if(!hits.length){box.hidden=true;box.innerHTML='';box.classList.remove('up');oq.setAttribute('aria-expanded','false');oq.removeAttribute('aria-activedescendant');return}
+if(ddHi>=hits.length)ddHi=hits.length-1;if(ddHi<0)ddHi=0;box.hidden=false;
+box.innerHTML=hits.map((k,i)=>{const x=P[k],meta=x.p?`${FL[lang].up} ${nm(x.p)}`:(x.a&&x.a[lang].f)||(x.c&&x.c[lang].tag)||GN[x.g][lang];
+return `<div class="item${x.p?' sub':''}${i===ddHi?' hi':''}" role="option" id="oqopt-${i}" data-k="${esc(k)}" aria-selected="${i===ddHi}"><i class="sw" aria-hidden="true" style="background:${GC[x.g]}"></i><span><b>${esc(nm(k))}${x.c?' ★':''}</b><small>${esc(meta)}</small></span></div>`}).join('');
+oq.setAttribute('aria-expanded','true');oq.setAttribute('aria-activedescendant','oqopt-'+ddHi);
+const hi=box.querySelector('.hi');if(hi){const top=hi.offsetTop,bot=top+hi.offsetHeight;if(top<box.scrollTop)box.scrollTop=top;else if(bot>box.scrollTop+box.clientHeight)box.scrollTop=bot-box.clientHeight}
+const r=oq.getBoundingClientRect(),below=innerHeight-r.bottom,above=r.top;box.classList.toggle('up',below<180&&above>below)}
+function chooseOrigin(k){const box=document.getElementById('oqdd');if(box.hidden&&sel===k)return;ddOn=false;pick(k,1)}
 function render(){const F=FL[lang];document.documentElement.lang=lang==='zh'?'zh-Hant':'en';bEn.classList.toggle('on',lang==='en');bZh.classList.toggle('on',lang==='zh');
 document.querySelectorAll('[data-t]').forEach(e=>e.innerHTML=T(e.dataset.t));document.title=T('title');if(oq){oq.placeholder=F.q;oq.setAttribute('aria-label',F.q)}
 species.innerHTML=Object.entries(SESSION.species||{}).map(([k,v])=>`<div class="item ${sel==k?'sel':''}" role="button" ${KEY} onclick="pickSp('${k}')"><div class="dot" style="background:${colors[k]||'#a67b5b'}"></div><div><b>${v[lang].name}</b><small>${v[lang].tag}</small></div></div>`).join('');
@@ -1903,7 +1928,19 @@ function setTab(t){tab=t;const h=new URLSearchParams(location.hash.slice(1));h.s
 addEventListener('scroll',()=>document.getElementById('top').classList.toggle('scrolled',scrollY>4),{passive:true});
 bEn.onclick=()=>setLang('en');bZh.onclick=()=>setLang('zh');
 
-oq.oninput=e=>{q=e.target.value.trim().toLowerCase();originsList()};
+oq.oninput=e=>{q=e.target.value.trim().toLowerCase();ddOn=!!q;ddHi=0;const hits=q?ddKeys():[];if(hits.length===1&&hits[0]!==sel)pick(hits[0],0);else originsList()};
+oq.addEventListener('focus',()=>{if(q){ddOn=true;renderDD()}});
+oq.addEventListener('blur',()=>{clearTimeout(ddBlur);ddBlur=setTimeout(()=>{ddOn=false;renderDD()},300)});
+oq.addEventListener('keydown',e=>{const box=document.getElementById('oqdd');
+if(e.key==='Escape'){if(!box.hidden){ddOn=false;renderDD();e.preventDefault()}return}
+if(box.hidden)return;const n=box.children.length;
+if(e.key==='ArrowDown'){e.preventDefault();ddHi=Math.min(n-1,ddHi+1);renderDD()}
+else if(e.key==='ArrowUp'){e.preventDefault();ddHi=Math.max(0,ddHi-1);renderDD()}
+else if(e.key==='Enter'){const k=box.querySelector('.hi')?.dataset.k;if(k){e.preventDefault();chooseOrigin(k)}}});
+oqdd.addEventListener('mousedown',()=>clearTimeout(ddBlur));
+oqdd.addEventListener('mouseup',()=>{if(document.activeElement!==oq){clearTimeout(ddBlur);ddBlur=setTimeout(()=>{ddOn=false;renderDD()},300)}});
+oqdd.addEventListener('mouseover',e=>{const el=e.target.closest('[data-k]');if(!el||el.classList.contains('hi'))return;ddHi=[...el.parentNode.children].indexOf(el);el.parentNode.querySelectorAll('[role="option"]').forEach(n=>{n.classList.toggle('hi',n===el);n.setAttribute('aria-selected',n===el?'true':'false')});oq.setAttribute('aria-activedescendant',el.id)});
+oqdd.addEventListener('click',e=>{const el=e.target.closest('[data-k]');if(!el)return;clearTimeout(ddBlur);chooseOrigin(el.dataset.k)});
 function fitAll(){const ll=Object.values(P).filter(x=>!x.p).map(x=>x.ll);if(ll.length)map.fitBounds(ll,{paddingTopLeft:[30,40],paddingBottomRight:[110,20],animate:false})}
 try{map=L.map('map',{worldCopyJump:false,zoomSnap:0.25,minZoom:1,maxZoom:8,maxBounds:[[-75,-210],[85,210]]}).setView([8,20],2);map.getContainer().style.background='#E7E1D7';
 L.geoJSON(window.WORLD,{style:{color:'#D3C8B8',weight:0.6,fillColor:'#FBF8F3',fillOpacity:1},onEachFeature:function(f,l){l.bindTooltip(f.properties.n,{sticky:true});}}).addTo(map);
