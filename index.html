@@ -975,6 +975,9 @@ input[type=checkbox]:checked::after{opacity:1}
   #regions{display:none}
   .oqwrap{margin:0}
   .cupsec .photo{position:static}
+  /* Keep Leaflet zoom controls inside the map, under the sticky header. */
+  #mapwrap{isolation:isolate;z-index:0;overflow:hidden;transform:translateZ(0)}
+  #mapwrap .leaflet-top,#mapwrap .leaflet-bottom{z-index:800}
 }
 @media (max-width:760px){
   :root{--gutter:16px;--hd:auto}
