@@ -1921,8 +1921,23 @@ if(x.notes||x.tip){dCls.style.display='';dNotes.textContent=x.notes||'';dTip.inn
 const _b=pt&&BLK[pt.g];dHead.classList.toggle('blk',!!_b);dHead.style.cssText=_b?BV(pt.g):'';
 tabs();requestAnimationFrame(()=>{declutter();balance()})}
 function legend(){let el=document.getElementById('mapLegend');if(!el)return;el.innerHTML=Object.keys(GC).map(g=>`<button type="button" class="lg" data-g="${g}"><i style="background:${GC[g]}" aria-hidden="true"></i>${GN[g][lang]}</button>`).join('')+`<span class="lg note">${FL[lang].cls}</span>`}
-function fitGroup(g){if(!map||!P)return;const ll=Object.keys(P).filter(k=>P[k].g===g&&P[k].ll).map(k=>P[k].ll);if(!ll.length)return;const narrow=innerWidth<=1000,motion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-map.fitBounds(ll,{paddingTopLeft:narrow?[36,40]:[40,48],paddingBottomRight:narrow?[84,24]:[120,28],maxZoom:5,animate:!motion})}
+let pinShift=null;
+function syncPins(g){pinShift=g||null;if(map)map.setMaxBounds(g?[[-75,-220],[85,260]]:[[-75,-210],[85,210]]);
+for(const k in markers){const ll=P[k].ll;if(!ll||!markers[k])continue;const lon=g&&P[k].g===g&&ll[1]<0?ll[1]+360:ll[1];markers[k].setLatLng([ll[0],lon])}}
+function fitGroup(g){if(!map||!P)return;const pts=Object.keys(P).filter(k=>P[k].g===g&&P[k].ll).map(k=>P[k].ll);if(!pts.length)return;
+const narrow=innerWidth<=1000,motion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pad=narrow?{tl:[36,40],br:[84,24]}:{tl:[40,48],br:[120,28]};
+const lons=pts.map(p=>p[1]),span=Math.max(...lons)-Math.min(...lons);
+if(span<=180){syncPins(null);map.fitBounds(pts,{paddingTopLeft:pad.tl,paddingBottomRight:pad.br,maxZoom:5,animate:!motion});return}
+syncPins(g);
+const u=lons.map(lon=>lon<0?lon+360:lon),lats=pts.map(p=>p[0]);
+const west=Math.min(...u),east=Math.max(...u),south=Math.min(...lats),north=Math.max(...lats);
+let cLng=(west+east)/2;if(cLng>180)cLng-=360;
+const right=pad.br[0]+(narrow?70:20);
+const size=map.getSize(),w=Math.max(80,size.x-pad.tl[0]-right),h=Math.max(80,size.y-pad.tl[1]-pad.br[1]);
+const merc=lat=>Math.log(Math.tan(Math.PI/4+Math.max(-85,Math.min(85,lat))*Math.PI/360));
+const z=Math.max(map.getMinZoom(),Math.min(5,Math.log2(w*360/(Math.max(east-west,12)*256)),Math.log2(h*(merc(85)-merc(-85))/(Math.max(Math.abs(merc(north)-merc(south)),.2)*256))));
+const snap=map.options.zoomSnap||1;map.setView([(south+north)/2,cLng],Math.round(z/snap)*snap,{animate:!motion})}
 document.getElementById('mapLegend').addEventListener('click',e=>{const b=e.target.closest('button[data-g]');if(b)fitGroup(b.dataset.g)});
 function pick(k,fly){sel=k;if(fly&&markers[k]&&map)map.flyTo(P[k].ll,Math.max(map.getZoom(),P[k].p?5:4),{duration:.8});render()}
 function setLang(l){lang=l;localStorage.setItem('sonnecad-lang',l);render();if(typeof s2render==='function'&&window.__S2OK)s2render()}
@@ -1954,7 +1969,7 @@ oqdd.addEventListener('mousedown',()=>clearTimeout(ddBlur));
 oqdd.addEventListener('mouseup',()=>{if(document.activeElement!==oq){clearTimeout(ddBlur);ddBlur=setTimeout(()=>{ddOn=false;renderDD()},300)}});
 oqdd.addEventListener('mouseover',e=>{const el=e.target.closest('[data-k]');if(!el||el.classList.contains('hi'))return;ddHi=[...el.parentNode.children].indexOf(el);el.parentNode.querySelectorAll('[role="option"]').forEach(n=>{n.classList.toggle('hi',n===el);n.setAttribute('aria-selected',n===el?'true':'false')});oq.setAttribute('aria-activedescendant',el.id)});
 oqdd.addEventListener('click',e=>{const el=e.target.closest('[data-k]');if(!el)return;clearTimeout(ddBlur);chooseOrigin(el.dataset.k)});
-function fitAll(){const ll=Object.values(P).filter(x=>!x.p).map(x=>x.ll);if(ll.length)map.fitBounds(ll,{paddingTopLeft:[30,40],paddingBottomRight:[110,20],animate:false})}
+function fitAll(){if(typeof syncPins==='function')syncPins(null);const ll=Object.values(P).filter(x=>!x.p).map(x=>x.ll);if(ll.length)map.fitBounds(ll,{paddingTopLeft:[30,40],paddingBottomRight:[110,20],animate:false})}
 try{map=L.map('map',{worldCopyJump:false,zoomSnap:0.25,minZoom:1,maxZoom:8,maxBounds:[[-75,-210],[85,210]]}).setView([8,20],2);map.getContainer().style.background='#E7E1D7';
 L.geoJSON(window.WORLD,{style:{color:'#D3C8B8',weight:0.6,fillColor:'#FBF8F3',fillOpacity:1},onEachFeature:function(f,l){l.bindTooltip(f.properties.n,{sticky:true});}}).addTo(map);
 if(SESSION.belt!==false)L.rectangle([[-23.4,-180],[23.4,180]],{color:'#A67325',weight:1.2,dashArray:'5 5',fillColor:'#B98535',fillOpacity:.10,interactive:false}).addTo(map);
