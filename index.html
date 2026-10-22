@@ -953,8 +953,11 @@ input[type=checkbox]:checked::after{opacity:1}
 }
 @media (max-width:1000px){
   .origin-grid,.bt-top,.calcgrid,.cupsec,.qcgrid{grid-template-columns:minmax(0,1fr)}
-  .origins{position:static;max-height:none}
-  #regions{max-height:520px}
+  /* Beans Origin: map → search → details. The region list stays in the DOM for desktop. */
+  .origins{position:static;max-height:none;order:-1;border-top:0;padding-top:0}
+  .origins>.lbl[data-t="regionsH"]{display:none}
+  #regions{display:none}
+  #oq{margin:0}
   .cupsec .photo{position:static}
 }
 @media (max-width:760px){
