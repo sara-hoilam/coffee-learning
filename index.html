@@ -1833,7 +1833,7 @@ const SESSION = {
 };
 
 const H=new URLSearchParams(location.hash.slice(1));
-let lang=H.get('lang')||localStorage.getItem('sonnecad-lang')||'en',sel=null,markers={},map,q='';
+let lang=H.get('lang')||localStorage.getItem('sonnecad-lang')||'en',sel='brazil',markers={},map,q='';
 const T=k=>(SESSION.ui[lang]||{})[k]||'';
 const colors={arabica:'#6B3E1E',robusta:'#201E1F',liberica:'#1C3D24'};
 const AT=window.ATLAS||{},CR=SESSION.regions||{};
@@ -2014,4 +2014,6 @@ const sm=document.getElementById('s2Sum');if(sm){const q=(S2Q[lang]||S2Q.en).map
 window.__S2OK=true;
 
 render();
+// open with the default origin (Brazil) scrolled into view in the Origins list
+{const rg=document.getElementById('regions'),it=rg&&rg.querySelector('.item.sel');if(it&&rg.clientHeight)rg.scrollTop+=it.getBoundingClientRect().top-rg.getBoundingClientRect().top-8}
 </script></body></html>
