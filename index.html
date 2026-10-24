@@ -936,6 +936,11 @@ figure:empty{display:none}
 .steps .num{width:44px;flex:none;font-size:40px;line-height:1;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .cupsec .photo{position:sticky;top:calc(var(--hd) + 16px)}
 .calcgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:var(--s-4) var(--s-5);align-items:start;margin-top:var(--s-6)}
+.cupdemo{margin-top:var(--s-6)}
+.cupstage{display:flex;flex-direction:column;align-items:center;margin:var(--s-3) 0 0}
+.cupvid{display:block;width:min(100%,440px,calc(70vh * 9 / 16));height:auto;max-height:70vh;aspect-ratio:9/16;border-radius:var(--r-media);border:1.5px solid var(--ink);background:var(--ink);object-fit:contain}
+.cupstage figcaption{margin-top:var(--s-1);max-width:42ch;text-align:center;font-size:14px;line-height:1.4;color:var(--ink-2)}
+@media (max-width:760px){.cupvid{width:100%;max-width:100%;max-height:none}}
 .sl,.cups{display:grid;grid-template-columns:170px minmax(0,1fr) 60px;gap:var(--s-2) 20px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule);font-size:16px;line-height:1.35}
 .sl output,.cups output{text-align:right;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
 .cupset{display:flex;flex-wrap:wrap;gap:6px 18px}
@@ -1062,6 +1067,7 @@ input[type=checkbox]:checked::after{opacity:1}
 <div class="tabp" id="tab-grading" hidden>
 <section class="wrap intro"><div class="intro-txt"><div class="bar" style="--c:var(--c-grading)"></div><h2 class="display" data-intro="grading"></h2><p class="lede" data-lede="grading"></p></div></section>
 <section class="wrap"><div class="rule-sec cupsec" id="cupSec"><div><p class="ct" id="p_cupH"></p><div id="cupProt"></div></div><figure class="photo" id="cupPhoto"></figure></div></section>
+<section class="wrap cupdemo"><div class="rule-sec"><p class="ct" id="p_demoH"></p><figure class="cupstage"><video class="cupvid" controls playsinline preload="metadata" width="720" height="1280" src="assets/cupping-demo.mp4"></video><figcaption id="p_demoCap"></figcaption></figure></div></section>
 <div class="wrap calcgrid"><section class="rule-sec"><p class="ct" id="p_calcH"></p><div id="calc"></div></section><section class="rule-sec"><p class="ct" id="p_attrH"></p><div id="attrs"></div></section></div>
 </div>
 <div style="height:var(--s-6)"></div>
@@ -1992,7 +1998,7 @@ var S2U={a_mtH:{en:'Altitude mountain — click a band or a species marker',zh:'
 a_mtNote:{en:'Class ranges overlap, as taught (commonly quoted textbook bands). Typical: most specialty Arabica is grown at roughly 1,000–2,200 m; latitude matters too (farther from the equator = cooler, so good coffee grows lower, e.g. Hawaii).',zh:'課堂所教的海拔範圍互相重疊（常見教科書分法）。一般而言：大部分精品阿拉比卡種於約 1,000–2,200 米；緯度亦有影響（離赤道越遠越涼，好咖啡可種得較低，例如夏威夷）。'},
 a_treeH:{en:'The coffee tree',zh:'咖啡樹'},a_tfH:{en:'Tree facts',zh:'咖啡樹小知識'},a_varH:{en:'Arabica varieties gallery',zh:'阿拉比卡品種圖鑑'},
 a_varNote:{en:'Lineage and flavour notes are typical descriptions (World Coffee Research catalog, importer origin guides); individual lots vary.',zh:'品系及風味為一般描述（World Coffee Research 品種目錄、進口商產地指南）；個別批次會有差異。'},
-p_mH:{en:'Processing methods',zh:'處理法'},p_qcH:{en:'Quality control after processing',zh:'處理後品質控制'},p_cupH:{en:'Cupping protocol',zh:'杯測流程'},p_calcH:{en:'Cupping score calculator (SCA classic form style)',zh:'杯測評分計算器（SCA 傳統表格式）'},p_attrH:{en:'What each attribute means',zh:'各評分項目解釋'},
+p_mH:{en:'Processing methods',zh:'處理法'},p_qcH:{en:'Quality control after processing',zh:'處理後品質控制'},p_cupH:{en:'Cupping protocol',zh:'杯測流程'},p_demoH:{en:'Cupping demo',zh:'杯測示範'},p_demoCap:{en:'Step-by-step cupping demonstration.',zh:'一步一步的杯測示範。'},p_calcH:{en:'Cupping score calculator (SCA classic form style)',zh:'杯測評分計算器（SCA 傳統表格式）'},p_attrH:{en:'What each attribute means',zh:'各評分項目解釋'},
 p_combo:{en:'💡 Methods can be combined, e.g. washed + anaerobic. Processing also sorts out beans below standard (floaters, unripe & defective cherries).',zh:'💡 處理法可以組合，例如水洗＋厭氧。處理過程亦會篩走不合標準的豆（浮豆、未熟及瑕疵果實）。'}};
 const BANDS=[
 {k:'vh',c:'#DCE6EE',n:{en:'Very high',zh:'極高海拔'},r:'1,525–5,000 m',o:{en:'Colombia, Ethiopia, Kenya, Papua New Guinea',zh:'哥倫比亞、埃塞俄比亞、肯亞、巴布亞新幾內亞'},cl:{en:'Less oxygen; big day/night temperature difference → slow maturation',zh:'氧氣較少；日夜溫差大 → 成熟較慢'},f:{en:'Fruity, floral, complex; high acidity & sweetness',zh:'果香、花香、層次複雜；酸度及甜度高'},sp:'arabica'},
